@@ -13,7 +13,7 @@ print('Para sair use CTRL+X\n')
 msg = input()
 
 while msg != '\x18':
-    tcp.send (msg)
+    tcp.send(msg.encode())
     msg = input()
 
 tcp.close()
