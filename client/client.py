@@ -18,13 +18,13 @@ class Client:
     def __del__(self) -> None:
         self._connection.close()
 
-    def update_directories(self) -> None:
-        self._connection.send(f'{GET}')
+    def update_directories(self, path) -> None:
+        self._connection.sendall(f'{GET}{SEPARATOR}{path}'.encode())
 
     def upload_file(self, filename: str) -> None:
         filesize = os.path.getsize(filename)
         # Send the filename and filesize
-        self._connection.send(f'{filename}{SEPARATOR}{filesize}'.encode())
+        self._connection.sendall(f'{filename}{SEPARATOR}{filesize}'.encode())
         # Start sending the file
         progress = tqdm.tqdm(range(filesize), f'Sending {filename}', unit='B', unit_scale=True, unit_divisor=1024)
         with open(filename, 'rb') as file:
@@ -40,10 +40,10 @@ class Client:
                 progress.update(len(bytes_read))
 
     def delete_file(self, filename: str) -> None:
-        self._connection.send(f'{DELETE}{SEPARATOR}{filename}')
+        self._connection.sendall(f'{DELETE}{SEPARATOR}{filename}'.encode())
         
     def create_directory(self, folder: str) -> None:
-        self._connection.send(f'{POST}{SEPARATOR}{folder}')
+        self._connection.sendall(f'{POST}{SEPARATOR}{folder}'.encode())
 
     def delete_directory(self, folder: str) -> None:
-        self._connection.send(f'{DELETE}{SEPARATOR}{folder}')
+        self._connection.sendall(f'{DELETE}{SEPARATOR}{folder}'.encode())
