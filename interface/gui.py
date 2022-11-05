@@ -11,7 +11,7 @@ from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
 
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / 'assets' / 'frame0'
+ASSETS_PATH = OUTPUT_PATH / Path(r"/home/predo/Documentos/pyproj/build/assets/frame0")
 
 
 def relative_to_assets(path: str) -> Path:
@@ -36,9 +36,9 @@ canvas = Canvas(
 
 canvas.place(x = 0, y = 0)
 canvas.create_rectangle(
-    1.0,
     0.0,
-    193.0,
+    0.0,
+    191.0,
     402.0,
     fill="#5C4974",
     outline="")
@@ -192,6 +192,14 @@ button_4.place(
     width=123.0,
     height=30.0
 )
+
+canvas.create_rectangle(
+    132.0,
+    50.0,
+    255.0,
+    80.0,
+    fill="#000000",
+    outline="")
 
 button_image_5 = PhotoImage(
     file=relative_to_assets("button_5.png"))
@@ -616,7 +624,7 @@ button_19 = Button(
     relief="flat"
 )
 button_19.place(
-    x=421.0,
+    x=416.0,
     y=260.0,
     width=50.0,
     height=50.0
