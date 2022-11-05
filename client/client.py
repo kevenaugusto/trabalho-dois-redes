@@ -3,6 +3,11 @@ import tqdm
 import os
 
 SEPARATOR = '<SEPARATOR>'
+GET = '<GET>'
+POST = '<POST>'
+PUT = '<PUT>'
+DELETE = '<DELETE>'
+
 BUFFER_SIZE = 4096 # Send 4096 bytes each time step
 
 class Client:
@@ -13,8 +18,8 @@ class Client:
     def __del__(self) -> None:
         self._connection.close()
 
-    def update_directories(self):
-        pass
+    def update_directories(self) -> None:
+        self._connection.send(f'{GET}')
 
     def upload_file(self, filename: str) -> None:
         filesize = os.path.getsize(filename)
@@ -34,13 +39,11 @@ class Client:
                 # Update the progress bar
                 progress.update(len(bytes_read))
 
-    def delete_file(self):
-        pass
+    def delete_file(self, filename: str) -> None:
+        self._connection.send(f'{DELETE}{SEPARATOR}{filename}')
         
-    def create_directory(self):
-        pass
+    def create_directory(self, folder: str) -> None:
+        self._connection.send(f'{POST}{SEPARATOR}{folder}')
 
-    def delete_directory(self):
-        pass
-
-
+    def delete_directory(self, folder: str) -> None:
+        self._connection.send(f'{DELETE}{SEPARATOR}{folder}')
