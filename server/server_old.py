@@ -14,7 +14,7 @@ while True:
 
     print('Conectado por', cliente)
 
-    while True:
+    while (True):
         msg = con.recv(1024)
 
         if not msg:
