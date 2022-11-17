@@ -3,6 +3,8 @@ import tqdm
 import os
 
 SEPARATOR = '<SEPARATOR>'
+RECEIVED = '<RECEIVED>'
+EOF = '<EOF>'
 GET = '<GET>'
 POST = '<POST>'
 PUT = '<PUT>'
@@ -27,30 +29,26 @@ class Client:
 
     def upload_file(self, filename: str) -> str:
         filesize = os.path.getsize(filename)
-        # Send the filename and filesize
         self._connection.sendall(f'{filename}{SEPARATOR}{filesize}'.encode())
-        # Start sending the file
         progress = tqdm.tqdm(range(filesize), f'Sending {filename}', unit='B', unit_scale=True, unit_divisor=1024)
         with open(filename, 'rb') as file:
             while (True):
-                # Read the bytes from the file
                 bytes_read = file.read(BUFFER_SIZE)
                 if (not bytes_read):
-                    # File transmitting is done
+                    self._connection.sendall(f'{EOF}'.encode())
                     break
-                # We use sendall to assure transmission in busy networks
                 self._connection.sendall(bytes_read)
-                # Update the progress bar
+                received = self._connection.recv(BUFFER_SIZE)
+                if (received.decode() != RECEIVED):
+                    raise Exception('O servidor não recebeu o arquivo!')
                 progress.update(len(bytes_read))
+        progress.close()
         return self._connection.recv(BUFFER_SIZE).decode()
 
-    def delete_file(self, filename: str) -> str:
+    def delete(self, filename: str) -> str:
         self._connection.sendall(f'{DELETE}{SEPARATOR}{filename}'.encode())
         return self._connection.recv(BUFFER_SIZE).decode()
         
     def create_directory(self, folder: str) -> str:
         self._connection.sendall(f'{POST}{SEPARATOR}{folder}'.encode())
         return self._connection.recv(BUFFER_SIZE).decode()
-
-    def delete_directory(self, folder: str) -> None:
-        self._connection.sendall(f'{DELETE}{SEPARATOR}{folder}'.encode())

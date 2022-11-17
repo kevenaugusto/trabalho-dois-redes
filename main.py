@@ -1,5 +1,5 @@
-from server.server_def import Server
-from client.client_def import Client
+from server.server_class import Server
+from client.client_class import Client
 from pathlib import Path
 
 OUTPUT_PATH = Path(__file__).parent
@@ -12,11 +12,12 @@ def main():
     match option:
         case '1':
             server = Server(host, port)
-            print('Pressione Ctrl+C para encerrar a execução...')
+            print('\nPressione Ctrl+C para encerrar a execução...\n')
             server.receive_connection()
         case '2':
             client = Client(host, port)
             keep_loop = True
+            print() # Line Break
             while (keep_loop):
                 print('[1] Atualizar Diretório')
                 print('[2] Carregar Arquivo')
@@ -26,18 +27,19 @@ def main():
                 option = input('O que deseja realizar?: ')
                 match option:
                     case '1':
-                        print(client.update_directories(OUTPUT_PATH))
+                        print(f'\n{client.update_directories(OUTPUT_PATH)}\n')
                     case '2':
                         filepath = input('Caminho do Arquivo: ')
-                        print(client.upload_file(filepath))
+                        print(f'\n{client.upload_file(filepath)}\n')
                     case '3':
                         path = input('Caminho do Arquivo/Diretório: ')
-                        print(client.delete_file(OUTPUT_PATH / path))
+                        print(f'\n{client.delete(OUTPUT_PATH / path)}\n')
                     case '4':
                         name = input('Nome do Diretório: ')
-                        print(client.create_directory(OUTPUT_PATH / name))
+                        print(f'\n{client.create_directory(OUTPUT_PATH / name)}\n')
                     case '5':
                         print('Encerrando...')
+                        del(client) # Closes server connection
                         keep_loop = False
                     case _:
                         print('Opção inválida.../n')
