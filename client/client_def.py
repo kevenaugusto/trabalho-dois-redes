@@ -18,10 +18,14 @@ class Client:
     def __del__(self) -> None:
         self._connection.close()
 
-    def update_directories(self, path) -> None:
+    def update_directories(self, path) -> str:
         self._connection.sendall(f'{GET}{SEPARATOR}{path}'.encode())
+        directories = self._connection.recv(BUFFER_SIZE).decode().split(SEPARATOR)
+        directories.pop(0)
+        directories = ', '.join(directories)
+        return directories
 
-    def upload_file(self, filename: str) -> None:
+    def upload_file(self, filename: str) -> str:
         filesize = os.path.getsize(filename)
         # Send the filename and filesize
         self._connection.sendall(f'{filename}{SEPARATOR}{filesize}'.encode())
@@ -38,12 +42,15 @@ class Client:
                 self._connection.sendall(bytes_read)
                 # Update the progress bar
                 progress.update(len(bytes_read))
+        return self._connection.recv(BUFFER_SIZE).decode()
 
-    def delete_file(self, filename: str) -> None:
+    def delete_file(self, filename: str) -> str:
         self._connection.sendall(f'{DELETE}{SEPARATOR}{filename}'.encode())
+        return self._connection.recv(BUFFER_SIZE).decode()
         
-    def create_directory(self, folder: str) -> None:
+    def create_directory(self, folder: str) -> str:
         self._connection.sendall(f'{POST}{SEPARATOR}{folder}'.encode())
+        return self._connection.recv(BUFFER_SIZE).decode()
 
     def delete_directory(self, folder: str) -> None:
         self._connection.sendall(f'{DELETE}{SEPARATOR}{folder}'.encode())
