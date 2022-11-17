@@ -3,6 +3,7 @@ import tqdm
 import os
 
 from pathlib import Path
+from util.delete_methods import delete
 
 SEPARATOR = '<SEPARATOR>'
 GET = '<GET>'
@@ -30,11 +31,38 @@ class Server:
             client, address = self._connection.accept()
             request_type, parameter = client.recv(BUFFER_SIZE).decode().split(SEPARATOR)
             if (request_type == GET):
-                pass
+                data = '' # Needs to execute data.pop(0) after decode().split(SEPARATOR)
+                for directory in os.listdir(parameter):
+                    data = data + SEPARATOR + directory
+                client.sendall(data.encode())
             elif (request_type == POST):
-                pass
+                Path(parameter).mkdir(parents=True, exist_ok=True)
+                client.sendall(f'A pasta {parameter} foi criada com sucesso!'.encode())
             elif (request_type == PUT):
-                pass
+                raise Exception('Not implemented yet')
             elif (request_type == DELETE):
-                pass
+                try:
+                    delete(Path(parameter))
+                    client.sendall(f'O diretório/arquivo {parameter} foi removido com sucesso!'.encode())
+                except Exception as error:
+                    print(error)
+            else:
+                # HERE REQUEST_TYPE IS THE FILE NAME                
+                filesize = int(parameter)
+                # start receiving the file from the socket
+                # and writing to the file stream
+                progress = tqdm.tqdm(range(filesize), f'Receiving {request_type}', unit='B', unit_scale=True, unit_divisor=1024)
+                with open(request_type, 'wb') as f:
+                    while True:
+                        # read 1024 bytes from the socket (receive)
+                        bytes_read = client.recv(BUFFER_SIZE)
+                        if not bytes_read:
+                            # nothing is received
+                            # file transmitting is done
+                            break
+                        # write to the file the bytes we just received
+                        f.write(bytes_read)
+                        # update the progress bar
+                        progress.update(len(bytes_read))
+                client.sendall(f'O arquivo {request_type} foi recebido com sucesso!'.encode())
             client.close()
